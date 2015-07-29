@@ -19,13 +19,26 @@ EOF
 
   rm -rf ml-latest-small
 
-cat <<EOF > addyear.sql
-create table movies_years as select movieId, title, substr(trim(title),-5,4) as year, genres from movies;
-update movies_years set year = null where year not like '1%' and year not like '2%';
+cat <<EOF > fix.sql
+create table movies_fix as select movieId, title, substr(trim(title),-5,4) as year, genres from movies;
+update movies_fix set year = null where year not like '1%' and year not like '2%';
+update movies_fix set title = substr(trim(title),0,length(trim(title))-6) where year is not null;
 drop table movies;
-create table movies as select * from movies_years;
-drop table movies_years;
+create table movies as select cast(movieId as integer) as movieId, title, cast(year as integer) as year, genres from movies_fix;
+drop table movies_fix;
+create table ratings_fix as select cast(userId as integer) as userId, cast(movieId as integer) as movieId, cast(rating as real) as rating, cast(timestamp as integer) as timestamp from ratings;
+drop table ratings;
+create table ratings as select * from ratings_fix;
+drop table ratings_fix;
+create table links_fix as select cast(movieId as integer) as movieId, imdbId, tmdbId from links;
+drop table links;
+create table links as select * from links_fix;
+drop table links_fix;
+create table tags_fix as select cast(userId as integer) as userId, cast(movieId as integer) as movieId, tag, cast(timestamp as integer) as timestamp from tags;
+drop table tags;
+create table tags as select * from tags_fix;
+drop table tags_fix;
 EOF
-  echo ".read addyear.sql" | sqlite3 movielens-small.db
-  rm addyear.sql
+  echo ".read fix.sql" | sqlite3 movielens-small.db
+  rm fix.sql
 fi

@@ -34,7 +34,7 @@ create table links_fix as select cast(movieId as integer) as movieId, imdbId, tm
 drop table links;
 create table links as select * from links_fix;
 drop table links_fix;
-create table tags_fix as select cast(userId as integer) as userId, cast(movieId as integer) as movieId, tag, cast(timestamp as integer) as timestamp from tags;
+create table tags_fix as select cast(userId as integer) as userId, cast(movieId as integer) as movieId, tag, cast(timestamp as timestamp) as timestamp from tags;
 drop table tags;
 create table tags as select * from tags_fix;
 drop table tags_fix;
